@@ -13,10 +13,12 @@ main = hspec spec
 -- Some fixtures
 player1 = "1"
 player2 = "2"
+game = "abc"
 
 -- Init a new game with a given move for player1
-initGame :: Move -> Game
-initGame m = newGame PlayerMove {playerId = player1, move = m}
+makeGame :: Move -> Game
+makeGame m =
+  Game {state = Ongoing, gameId = game, firstMove = PlayerMove {playerId = player1, move = m}, secondMove = Nothing, result = Nothing}
 
 -- Make a move for player2
 makeMove :: Game -> Move -> Game
@@ -26,7 +28,8 @@ makeMove g m = g {secondMove = Just PlayerMove {playerId = player2, move = m}}
 gameWith :: Move -> Move -> Result -> Game
 gameWith m1 m2 r =
   Game
-  { state = Ended
+  { gameId = game
+  , state = Ended
   , firstMove = PlayerMove {playerId = player1, move = m1}
   , secondMove = Just PlayerMove {playerId = player2, move = m2}
   , result = Just r
@@ -36,10 +39,10 @@ spec :: Spec
 spec = describe "play" $ do
         context "when game only has one move" $
             it "doesn't change game" $
-              play (initGame Rock) `shouldBe` initGame Rock
+              play (makeGame Rock) `shouldBe` makeGame Rock
         context "when game has two players" $ do
           context "and first player plays rock" $ do
-              let rockGame = initGame Rock
+              let rockGame = makeGame Rock
               it "wins over scissors" $
                 play (makeMove rockGame Scissors) `shouldBe` gameWith Rock Scissors (Winner player1)
               it "looses to paper" $
@@ -47,7 +50,7 @@ spec = describe "play" $ do
               it "ties with rock" $
                 play (makeMove rockGame Rock) `shouldBe` gameWith Rock Rock Tie
           context "and first player plays paper" $ do
-              let paperGame = initGame Paper
+              let paperGame = makeGame Paper
               it "looses to scissors" $
                 play (makeMove paperGame Scissors) `shouldBe` gameWith Paper Scissors (Winner player2)
               it "ties with paper" $
@@ -55,7 +58,7 @@ spec = describe "play" $ do
               it "wins over rock" $
                 play (makeMove paperGame Rock) `shouldBe` gameWith Paper Rock (Winner player1)
           context "and first player plays scissors" $ do
-              let scissorsGame = initGame Scissors
+              let scissorsGame = makeGame Scissors
               it "ties with scissors" $
                 play (makeMove scissorsGame Scissors) `shouldBe` gameWith Scissors Scissors Tie
               it "wins over paper" $

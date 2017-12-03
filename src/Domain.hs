@@ -10,12 +10,15 @@ module Domain
   , PlayerMove(PlayerMove)
   , playerId
   , move
-  , newGame
+  , startGame
   , state
+  , gameId
   , firstMove
   , secondMove
   , result
   ) where
+
+import           Data.GUID
 
 -- Domain model
 
@@ -47,14 +50,21 @@ data State
   | Ended
   deriving (Eq, Show)
 
+type GameId = String
+
 data Game = Game
-  { state      :: State
+  { gameId     :: GameId
+  , state      :: State
   , firstMove  :: PlayerMove
   , secondMove :: Maybe PlayerMove
   , result     :: Maybe Result
   } deriving (Eq, Show)
 
 -- Functions
+
+generateGameId :: IO GameId
+generateGameId = genString
+
 playRound :: PlayerMove -> PlayerMove -> Result
 playRound pm1 pm2 =
   case result of
@@ -70,5 +80,13 @@ play g =
     Game {state = Ongoing, firstMove = move1, secondMove = Just move2, result = Nothing} -> g {state = Ended, result = Just $ playRound move1 move2}
     _ -> g
 
-newGame :: PlayerMove -> Game
-newGame pm = Game {state = Ongoing, firstMove = pm, secondMove = Nothing, result = Nothing}
+startGame :: (GameRepository repo) => repo -> PlayerMove -> IO Game
+startGame repo pm = do
+  gameId <- generateGameId
+  let game = Game {gameId = gameId, state = Ongoing, firstMove = pm, secondMove = Nothing, result = Nothing}
+  repo `save` game
+
+-- Repository
+class GameRepository impl where
+   findById :: impl -> GameId -> IO Game
+   save :: impl -> Game -> IO Game
