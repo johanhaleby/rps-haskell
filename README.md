@@ -1,5 +1,6 @@
 # Rock Paper Scissors in Haskell
 
+[![Build Status](https://travis-ci.org/johanhaleby/rps-haskell.svg?branch=master)](https://travis-ci.org/johanhaleby/rps-haskell)
 
 An attempt at Rock Paper Scissors in Haskell.
 
