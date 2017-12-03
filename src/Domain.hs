@@ -19,7 +19,6 @@ module Domain
 
 -- Domain model
 
-
 data Move
   = Rock
   | Paper
