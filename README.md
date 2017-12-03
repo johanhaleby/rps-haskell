@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/johanhaleby/rps-haskell.svg?branch=master)](https://travis-ci.org/johanhaleby/rps-haskell)
 
-An attempt at Rock Paper Scissors in Haskell.
+An beginners attempt at Rock Paper Scissors in Haskell.
 
 Initialize:
 
