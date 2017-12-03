@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Domain
   ( Move(Rock, Paper, Scissors)
   , play
@@ -33,7 +35,7 @@ data Result
   | Tie
   deriving (Eq, Show)
 
-type PlayerId = Integer
+type PlayerId = String
 
 data PlayerMove = PlayerMove
   { playerId :: PlayerId
