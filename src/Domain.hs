@@ -16,11 +16,17 @@ module Domain
   ) where
 
 -- Domain model
+
+
 data Move
   = Rock
   | Paper
   | Scissors
   deriving (Eq, Show)
+
+-- Game rules
+instance Ord Move where
+  (<=) m1 m2 = m1 == m2 || (m1, m2) `elem` [(Rock, Paper), (Paper, Scissors), (Scissors, Rock)]
 
 data Result
   = Winner PlayerId
@@ -33,6 +39,7 @@ data PlayerMove = PlayerMove
   { playerId :: PlayerId
   , move     :: Move
   } deriving (Eq, Show)
+
 
 data State
   = Ongoing
@@ -48,17 +55,13 @@ data Game = Game
 
 -- Functions
 playRound :: PlayerMove -> PlayerMove -> Result
-playRound PlayerMove {playerId = playerId1, move = move1} PlayerMove {playerId = playerId2, move = move2} =
-  case moves of
-    (Rock, Scissors)  -> Winner playerId1
-    (Paper, Rock)     -> Winner playerId1
-    (Scissors, Paper) -> Winner playerId1
-    (Scissors, Rock)  -> Winner playerId2
-    (Rock, Paper)     -> Winner playerId2
-    (Paper, Scissors) -> Winner playerId2
-    _                 -> Tie
+playRound pm1 pm2 =
+  case result of
+    LT -> Winner $ playerId pm2
+    EQ -> Tie
+    GT -> Winner $ playerId pm1
   where
-    moves = (move1, move2)
+    result = move pm1 `compare` move pm2
 
 play :: Game -> Game
 play g =
