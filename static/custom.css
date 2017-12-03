@@ -1,0 +1,23 @@
+body {
+    background: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.43, rgb(87,84,176)),
+        color-stop(0.72, rgb(208,206,235))
+    );
+    background: -moz-linear-gradient(
+        center bottom,
+        rgb(87,84,176) 43%,
+        rgb(208,206,235) 72%
+    );
+    height: 920px;
+}
+
+.container {
+    color: white;
+}
+
+.underline {
+	text-decoration: underline;
+}
