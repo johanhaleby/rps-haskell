@@ -1,22 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Domain
-  ( Move(Rock, Paper, Scissors)
-  , play
-  , Result(Winner, Tie)
-  , State(Ongoing, Ended)
-  , Game(Game)
-  , PlayerId
-  , PlayerMove(PlayerMove)
-  , playerId
-  , move
-  , startGame
-  , state
-  , gameId
-  , firstMove
-  , secondMove
-  , result
-  ) where
+module Domain( Move(Rock, Paper, Scissors), play, Result(Winner, Tie), State(Ongoing, Ended), Game(Game), PlayerId, PlayerMove(PlayerMove)
+  , playerId, move, startGame, state, gameId, firstMove, secondMove, result, GameId, GameRepository(save, findById)) where
 
 import           Data.GUID
 
@@ -43,7 +28,6 @@ data PlayerMove = PlayerMove
   { playerId :: PlayerId
   , move     :: Move
   } deriving (Eq, Show)
-
 
 data State
   = Ongoing
@@ -87,6 +71,6 @@ startGame repo pm = do
   repo `save` game
 
 -- Repository
-class GameRepository impl where
-   findById :: impl -> GameId -> IO Game
-   save :: impl -> Game -> IO Game
+class GameRepository repo where
+   findById :: repo -> GameId -> IO (Maybe Game)
+   save :: repo -> Game -> IO Game
