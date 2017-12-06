@@ -1,13 +1,17 @@
-module InMemoryRepository where
+{-# LANGUAGE FlexibleInstances #-}
+
+module InMemoryRepository(InMemoryGameRepository, clearState, newEmptyRepository) where
 
 import           Control.Monad          (mapM)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.Foldable          (find)
 import           Data.Hashable
 import           Data.IORef             (IORef, atomicModifyIORef, newIORef,
-                                         readIORef)
+                                         readIORef, writeIORef)
 import           Data.Set
-import           Domain                 hiding (State)
+import           Domain                 (Game, GameId,
+                                         GameRepository (findById, save),
+                                         gameId)
 
 -- Make Game ordable so that we can insert it to a Set
 instance Ord Game where
@@ -16,11 +20,9 @@ instance Ord Game where
 type State = (Set Game)
 type IORefState = IORef State
 
-ioRefState :: IO IORefState
-ioRefState = newIORef empty
-
-saveGame :: IO IORefState -> Game -> IO Game
-saveGame stateIO game = do
+-- Internal functions
+saveGameToRef :: IO IORefState -> Game -> IO Game
+saveGameToRef stateIO game = do
   state <- stateIO
   atomicModifyIORef
     state
@@ -28,13 +30,25 @@ saveGame stateIO game = do
        let newGameState = insert game games
        in (newGameState, newGameState))
   return game
-findGame :: IO IORefState -> GameId -> IO (Maybe Game)
-findGame stateIO id = do
+
+findGameFromRef :: IO IORefState -> GameId -> IO (Maybe Game)
+findGameFromRef stateIO id = do
   state <- stateIO :: IO IORefState
   gamesState <- readIORef state :: IO State
   return $ find (\game -> gameId game == id) gamesState
 
-instance GameRepository a =>
-         GameRepository (IORef a) where
-  findById _ = findGame ioRefState
-  save _ = saveGame ioRefState
+-- Public functions and types
+
+clearState :: InMemoryGameRepository -> IO ()
+clearState (InMemoryGameRepository stateIO) = do
+  ioRef <- stateIO
+  writeIORef ioRef empty
+
+newEmptyRepository :: InMemoryGameRepository
+newEmptyRepository = InMemoryGameRepository $ newIORef empty
+
+newtype InMemoryGameRepository = InMemoryGameRepository (IO IORefState)
+
+instance GameRepository InMemoryGameRepository where
+  findById (InMemoryGameRepository stateIO) = findGameFromRef stateIO
+  save (InMemoryGameRepository stateIO) = saveGameToRef stateIO
