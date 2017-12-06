@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Domain( Move(Rock, Paper, Scissors), play, Result(Winner, Tie), State(Ongoing, Ended), Game(Game), PlayerId, PlayerMove(PlayerMove)
   , playerId, move, startGame, state, gameId, firstMove, secondMove, result, GameId, GameRepository(save, findById)) where
 
@@ -12,10 +10,6 @@ data Move
   | Paper
   | Scissors
   deriving (Eq, Show)
-
--- Game rules
-instance Ord Move where
-  (<=) m1 m2 = m1 == m2 || (m1, m2) `elem` [(Rock, Paper), (Paper, Scissors), (Scissors, Rock)]
 
 data Result
   = Winner PlayerId
@@ -49,15 +43,19 @@ data Game = Game
 generateGameId :: IO GameId
 generateGameId = genString
 
-playRound :: PlayerMove -> PlayerMove -> Result
-playRound pm1 pm2 =
-  case result of
-    LT -> Winner $ playerId pm2
-    EQ -> Tie
-    GT -> Winner $ playerId pm1
-  where
-    result = move pm1 `compare` move pm2
+-- Game rules
+beats :: Move -> Move -> Bool
+Rock `beats` Scissors = True
+Paper `beats` Rock = True
+Scissors `beats` Paper = True
+_ `beats` _ = False
 
+playRound :: PlayerMove -> PlayerMove -> Result
+playRound PlayerMove {playerId = player1, move = player1Move} PlayerMove {playerId = playerId2, move = player2Move}
+  | player1Move == player2Move = Tie
+  | player1Move `beats` player2Move = Winner player1
+  | otherwise = Winner playerId2
+  
 play :: Game -> Game
 play g =
   case g of
@@ -71,6 +69,6 @@ startGame repo pm = do
   repo `save` game
 
 -- Repository
-class GameRepository repo where
-   findById :: repo -> GameId -> IO (Maybe Game)
-   save :: repo -> Game -> IO Game
+class GameRepository impl where
+   findById :: impl -> GameId -> IO (Maybe Game)
+   save :: impl -> Game -> IO Game
