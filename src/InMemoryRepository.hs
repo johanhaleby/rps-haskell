@@ -7,7 +7,7 @@ import           Control.Monad.IO.Class (liftIO)
 import           Data.Foldable          (find)
 import           Data.Hashable
 import           Data.IORef             (IORef, atomicModifyIORef, newIORef,
-                                         readIORef, writeIORef)
+                                         readIORef, atomicWriteIORef)
 import           Data.Set
 import           Domain                 (Game, GameId,
                                          GameRepository (findById, save),
@@ -32,17 +32,17 @@ saveGameToRef stateIO game = do
   return game
 
 findGameFromRef :: IO IORefState -> GameId -> IO (Maybe Game)
-findGameFromRef stateIO id = do
+findGameFromRef stateIO soughtGameId = do
   state <- stateIO :: IO IORefState
   gamesState <- readIORef state :: IO State
-  return $ find (\game -> gameId game == id) gamesState
+  return $ find (\game -> gameId game == soughtGameId) gamesState
 
 -- Public functions and types
 
 clearState :: InMemoryGameRepository -> IO ()
 clearState (InMemoryGameRepository stateIO) = do
   ioRef <- stateIO
-  writeIORef ioRef empty
+  atomicWriteIORef ioRef empty
 
 newEmptyRepository :: InMemoryGameRepository
 newEmptyRepository = InMemoryGameRepository $ newIORef empty
