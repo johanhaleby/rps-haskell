@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module InMemoryRepository(InMemoryGameRepository, clearState, newEmptyRepository) where
+module InMemoryRepository(InMemoryGameRepository(..), clearState, newEmptyRepository) where
 
 import           Control.Monad          (mapM)
 import           Control.Monad.IO.Class (liftIO)
@@ -21,34 +21,37 @@ type State = (Set Game)
 type IORefState = IORef State
 
 -- Internal functions
-saveGameToRef :: IO IORefState -> Game -> IO Game
-saveGameToRef stateIO game = do
-  state <- stateIO
+saveGameToIORef :: IORefState -> Game -> IO Game
+saveGameToIORef ioRef game = do
   atomicModifyIORef
-    state
+    ioRef
     (\games ->
        let newGameState = insert game games
        in (newGameState, newGameState))
   return game
 
-findGameFromRef :: IO IORefState -> GameId -> IO (Maybe Game)
-findGameFromRef stateIO soughtGameId = do
-  state <- stateIO :: IO IORefState
-  gamesState <- readIORef state :: IO State
+findGameInIORef :: IORefState -> GameId -> IO (Maybe Game)
+findGameInIORef ioRef soughtGameId = do
+  gamesState <- readIORef ioRef :: IO State
   return $ find (\game -> gameId game == soughtGameId) gamesState
 
 -- Public functions and types
 
 clearState :: InMemoryGameRepository -> IO ()
-clearState (InMemoryGameRepository stateIO) = do
-  ioRef <- stateIO
-  atomicWriteIORef ioRef empty
+clearState (InMemoryGameRepository ioRef) = atomicWriteIORef ioRef empty
 
-newEmptyRepository :: InMemoryGameRepository
-newEmptyRepository = InMemoryGameRepository $ newIORef empty
+newEmptyRepository :: IO InMemoryGameRepository
+newEmptyRepository = do
+  ioRefWithEmptyState <- newIORef empty
+  return $ InMemoryGameRepository ioRefWithEmptyState
 
-newtype InMemoryGameRepository = InMemoryGameRepository (IO IORefState)
+newtype InMemoryGameRepository = InMemoryGameRepository IORefState
 
 instance GameRepository InMemoryGameRepository where
-  findById (InMemoryGameRepository stateIO) = findGameFromRef stateIO
-  save (InMemoryGameRepository stateIO) = saveGameToRef stateIO
+  findById (InMemoryGameRepository ioRef) = findGameInIORef ioRef
+  save (InMemoryGameRepository ioRef) = saveGameToIORef ioRef
+
+doStuff game = do
+  ikk <- newIORef empty :: IO IORefState
+  let repo = InMemoryGameRepository ikk
+  findById repo game
