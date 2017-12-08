@@ -50,8 +50,3 @@ newtype InMemoryGameRepository = InMemoryGameRepository IORefState
 instance GameRepository InMemoryGameRepository where
   findById (InMemoryGameRepository ioRef) = findGameInIORef ioRef
   save (InMemoryGameRepository ioRef) = saveGameToIORef ioRef
-
-doStuff game = do
-  ikk <- newIORef empty :: IO IORefState
-  let repo = InMemoryGameRepository ikk
-  findById repo game
