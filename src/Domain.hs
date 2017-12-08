@@ -1,5 +1,5 @@
 module Domain( Move(Rock, Paper, Scissors), play, Result(Winner, Tie), State(Ongoing, Ended), Game(Game), PlayerId, PlayerMove(PlayerMove)
-  , playerId, move, startGame, state, gameId, firstMove, secondMove, result, GameId, GameRepository(save, findById)) where
+  , playerId, move, startGame, state, gameId, firstMove, secondMove, result, GameId, GameRepository(..)) where
 
 import           Data.GUID
 
