@@ -23,8 +23,8 @@ library
                      , wai-extra
                      , wai-middleware-static
                      , guid
-                     -- Set support
-                     , containers
+                     -- HashMap support
+                     , unordered-containers
                      , hashable
   default-language:    Haskell2010
 
@@ -46,8 +46,8 @@ test-suite rps-test
                      , hspec-wai
                      , hspec-wai-json
                      , http-types
-                     -- Set support
-                     , containers
+                     -- HashMap support
+                     , unordered-containers
                      , aeson
   ghc-options:         -threaded -O2 -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010

@@ -4,7 +4,6 @@ module InMemoryRepositorySpec(main, spec) where
 
 import           Control.Monad.IO.Class
 import           Data.IORef             (newIORef)
-import           Data.Set               (empty)
 import           Domain
 import           InMemoryRepository
 import           Test.Hspec
