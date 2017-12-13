@@ -2,6 +2,7 @@ module Domain( Move(Rock, Paper, Scissors), play, Result(Winner, Tie), State(Ong
   , playerId, move, startGame, state, gameId, firstMove, secondMove, result, GameId, GameRepository(..)) where
 
 import           Data.GUID
+import           Data.Text (Text)
 
 -- Domain model
 
@@ -16,7 +17,7 @@ data Result
   | Tie
   deriving (Eq, Show)
 
-type PlayerId = String
+type PlayerId = Text
 
 data PlayerMove = PlayerMove
   { playerId :: PlayerId
@@ -28,7 +29,7 @@ data State
   | Ended
   deriving (Eq, Show)
 
-type GameId = String
+type GameId = Text
 
 data Game = Game
   { gameId     :: GameId
@@ -41,7 +42,7 @@ data Game = Game
 -- Functions
 
 generateGameId :: IO GameId
-generateGameId = genString
+generateGameId = genText
 
 -- Game rules
 beats :: Move -> Move -> Bool
@@ -55,7 +56,7 @@ playRound PlayerMove {playerId = player1, move = player1Move} PlayerMove {player
   | player1Move == player2Move = Tie
   | player1Move `beats` player2Move = Winner player1
   | otherwise = Winner playerId2
-  
+
 play :: Game -> Game
 play g =
   case g of
@@ -72,3 +73,4 @@ startGame repo pm = do
 class GameRepository impl where
    findById :: impl -> GameId -> IO (Maybe Game)
    save :: impl -> Game -> IO Game
+   findAll :: impl -> IO [Game]
