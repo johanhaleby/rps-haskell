@@ -3,11 +3,11 @@
 module InMemoryRepository(InMemoryGameRepository(..), clearState, newEmptyRepository) where
 
 import           Data.HashMap.Lazy      (HashMap (..), empty, insert,
-                                         lookup)
+                                         lookup, elems)
 import           Data.IORef             (IORef, atomicModifyIORef,
                                          atomicWriteIORef, newIORef, readIORef)
 import           Domain                 (Game, GameId,
-                                         GameRepository (findById, save),
+                                         GameRepository (findById, save, findAll),
                                          gameId)
 import           Prelude                hiding (lookup)
 
@@ -29,6 +29,11 @@ findGameInIORef ioRef soughtGameId = do
   gamesState  <- readIORef ioRef :: IO State
   return $ lookup soughtGameId gamesState
 
+findAllInIORef :: IORefState -> IO [Game]
+findAllInIORef ioRef = do
+  gamesState <- readIORef ioRef :: IO State
+  return $ elems gamesState
+
 -- Public functions and types
 
 clearState :: InMemoryGameRepository -> IO ()
@@ -44,3 +49,4 @@ newtype InMemoryGameRepository = InMemoryGameRepository IORefState
 instance GameRepository InMemoryGameRepository where
   findById (InMemoryGameRepository ioRef) = findGameInIORef ioRef
   save (InMemoryGameRepository ioRef) = saveGameToIORef ioRef
+  findAll (InMemoryGameRepository ioRef) = findAllInIORef ioRef

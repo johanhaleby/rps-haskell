@@ -1,7 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
+
 module Http (runApp, app) where
 
-import           Data.Aeson                           (Value (..), object, (.=))
+import           Control.Monad.IO.Class               (liftIO)
+import           Data.Aeson                           (FromJSON, ToJSON,
+                                                       Value (..), encode,
+                                                       object, parseJSON,
+                                                       toJSON, withObject,
+                                                       withText, (.:), (.=))
+-- <> is needed to concatenate Text's
+import           Data.Semigroup                       ((<>))
+-- Need for converting strict Text (Data.Text) to lazy Text (Data.Text.Lazy) which Scotty is using
+import           Data.Text.Lazy                       (fromStrict)
+import           Domain
+import           InMemoryRepository
+import           Network.HTTP.Types                   (created201)
 import           Network.Wai                          (Application)
 import           Network.Wai.Middleware.RequestLogger
 import           Network.Wai.Middleware.Static
@@ -15,20 +29,62 @@ indexPage = do
   setHeader "Content-Type" "text/html"
   file "./static/index.html"
 
-routes :: ScottyM ()
-routes = do
+routes :: (GameRepository repo) => repo -> ScottyM ()
+routes gameRepository = do
   get "/" indexPage
-  get "/some-json" $ json $ object ["foo" .= Number 23, "bar" .= Number 42]
+  -- API
+  get "/api/games" $ do
+    allGames <- liftIO $ findAll gameRepository
+    json $ fmap toJSON allGames
+  post "/api/games" $ do
+    playerMove <- jsonData :: ActionM PlayerMove
+    game <- liftIO $ startGame gameRepository playerMove
+    setHeader "Location" (fromStrict $ "/api/games/" <> gameId game)
+    status created201
 
 app :: IO Application
-app = scottyApp routes
+app = do
+  repo <- newEmptyRepository
+  scottyApp $ routes repo
 
 runApp :: IO ()
-runApp =
+runApp = do
+  repo <- newEmptyRepository :: IO InMemoryGameRepository
   scotty 8080 $ do
     -- Apply request logging
     middleware logStdoutDev
     -- Apply static content
     middleware $ staticPolicy noDots
     -- Apply the routes
-    routes
+    routes repo
+
+-- JSON mapping
+instance ToJSON Game where
+  toJSON Game{..} = object
+      [ "gameId"  .= gameId
+      , "state"   .= show state
+      , "player1" .= playerId firstMove
+      ]
+
+instance FromJSON PlayerMove where
+  parseJSON =
+    withObject "person" $ \o -> do
+      playerId <- o .: "playerId"
+      move <- o .: "move"
+      return PlayerMove {..}
+
+--instance FromJSON Move where
+--  parseJSON = withObject "move" $ \o -> do
+--      kind <- o .: "kind"
+--      case kind of
+--        "person" -> Person <$> o .: "name" <*> o .: "age"
+--        "book"   -> Book <$> o .: "name" <*> o .: "author"
+--        _        -> fail ("unknown kind: " ++ kind)
+
+instance FromJSON Move where
+  parseJSON = withText "move" $ \txt ->
+    return $ case txt of
+      "Rock"     -> Rock
+      "Paper"    -> Paper
+      "Scissors" -> Scissors
+      _          -> Rock

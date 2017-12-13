@@ -26,6 +26,9 @@ library
                      -- HashMap support
                      , unordered-containers
                      , hashable
+                     , text
+                     -- For status codes
+                     , http-types
   default-language:    Haskell2010
 
 executable rps-exe

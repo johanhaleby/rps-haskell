@@ -35,3 +35,9 @@ spec =
            _ <- startGame repo player1Move
            noGame <- findById repo "non-existing"
            noGame `shouldBe` Nothing
+       context "when multple games are started" $
+         it "it's possible to find all ongoing games" $ do
+           repo <- repositoryIO
+           startGame repo player1Move
+           startGame repo PlayerMove {playerId = "player2", move = Rock}
+           findAll repo >>= (`shouldSatisfy` (\games -> length games == 2))

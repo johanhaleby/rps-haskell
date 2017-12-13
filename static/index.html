@@ -1,46 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="static/custom.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
-  <script id="gameTemplate" type="x-tmpl-mustache">
-    {{#.}}
-    <div class="row white-text">
-      <div class="col-sm-8">
-        <h3>{{name}}</h3>
-        <div class="row"><div class="col-sm-4 underline">Player 1</div><div class="col-sm-4 underline">Player 2</div></div>
-        <div class="row"><div class="col-sm-4">{{player1}}</div><div class="col-sm-4">{{player2}}</div></div>
-        {{#completed}}
-        <div class="row"><div class="col-sm-8">Winner: {{winner}}</div></div>
-        {{/completed}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/custom.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
+    <script id="errorTemplate" type="x-tmpl-mustache">
+      <div class="alert alert-danger">
+              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+              <strong>Error!</strong> {{message}}
       </div>
-    </div>
-    {{/.}}
-  </script>
-  <title>Rock Scissors paper</title>
+    </script>
+    <script id="gameTemplate" type="x-tmpl-mustache">
+        <!-- If there are no games then render this -->
+        {{^gamesExists}}
+            <div>No games are found</div>
+        {{/gamesExists}}
+        <!-- If there are games the render this -->
+        {{#gamesExists}}
+            <div class="row white-text">
+              <div class="col-sm-8">
+                <h3>{{name}}</h3>
+                <div class="row"><div class="col-sm-4 underline">Player 1</div><div class="col-sm-4 underline">Player 2</div></div>
+                <div class="row"><div class="col-sm-4">{{player1}}</div><div class="col-sm-4">{{player2}}</div></div>
+                {{#completed}}
+                <div class="row"><div class="col-sm-8">Winner: {{winner}}</div></div>
+                {{/completed}}
+              </div>
+            </div>
+        {{/gamesExists}}
+    </script>
+    <title>Rock Scissors paper</title>
 </head>
 <script type="text/javascript">
 
-  function renderGames() {
-    $.get(window.location.href + "api/games", function( games ) {
-      var gameTemplate = $('#gameTemplate').html();
-      var html = Mustache.render(gameTemplate, games);
-      $('#games').html(html);
-    });
-  }
+    function showError(message) {
+        var errorTemplate = $('#errorTemplate').html();
+        var errorMessage = {message: message};
+        var html = Mustache.render(errorTemplate, errorMessage);
+        $('#errors').html(html);
+    }
 
-  $(renderGames);
+    function renderGames() {
+        $.get(window.location.href + "api/games", function (games) {
+            var gameTemplate = $('#gameTemplate').html();
+            games.gamesExists = (games.length > 0);
+            var html = Mustache.render(gameTemplate, games);
+            $('#games').html(html);
+        });
+    }
+
+    function startGameOnClick() {
+        function makeStartGameRequest() {
+            var $startGameForm = $("#startGameForm");
+            var playerName = $startGameForm.find("#playerName").val();
+            var move = $startGameForm.find("#move").find(":selected").text();
+            $.ajax({
+                //  Allow JQuery to treat empty 201 responses as non errors,
+                // see https://stackoverflow.com/questions/2233553/data-inserted-successful-but-jquery-still-returning-error
+                dataFilter: function (data, dataType) {
+                    if (dataType === 'json' && data === '') {
+                        return null;
+                    } else {
+                        return data;
+                    }
+                },
+                type: "POST",
+                url: window.location.href + "api/games",
+                data: JSON.stringify({playerId: playerName, move: move}),
+                success: renderGames,
+                error: function (xhr) {
+                    console.log(xhr);
+                    showError(xhr.responseText);
+                },
+                dataType: 'json'
+            });
+        }
+        
+        $("#startGameButton").click(makeStartGameRequest)
+    }
+
+    $(function () {
+        startGameOnClick();
+        renderGames();
+    });
 </script>
 <div class="jumbotron text-center">
-  <h1>Games</h1>
+    <h1>Games</h1>
 </div>
 
 <div class="container">
-  <div id="games">Loading games....</div>
+    <div id="errors"></div>
+    <label for="startGame" class="underline">Start new game</label>
+    <div id="startGame">
+        <form id="startGameForm">
+            <label for="playerName">Player Name:</label>
+            <input type="text" minlength="5" id="playerName">
+            <label for="move">Move:</label>
+            <select id="move">
+                <option value="Rock" selected="selected">Rock</option>
+                <option value="Paper">Paper</option>
+                <option value="Scissors">Scissors</option>
+            </select>
+            <br>
+            <input type="button" value="Start game" id="startGameButton">
+        </form>
+    </div>
+
+    <br>
+    <br>
+    <label for="games" class="underline">Games</label>
+    <div id="games">Loading games....</div>
 </div>
 </html>
