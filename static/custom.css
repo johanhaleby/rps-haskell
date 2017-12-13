@@ -21,3 +21,7 @@ body {
 .underline {
 	text-decoration: underline;
 }
+
+.white-text {
+    color: white;
+}

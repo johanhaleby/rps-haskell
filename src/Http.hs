@@ -63,23 +63,23 @@ instance ToJSON Game where
   toJSON Game{..} = object
       [ "gameId"  .= gameId
       , "state"   .= show state
-      , "player1" .= playerId firstMove
+      , "playerId1" .= playerId firstMove
+      , "playerId2" .= case secondMove of
+                        Just move -> Just $ playerId move
+                        _ -> Nothing
+      -- TODO Use something like json+hal and add a link to join game instead
+      , "playable" .= case state of
+                        Ongoing -> True
+                        Ended -> False
+      , "result" .= result
       ]
 
 instance FromJSON PlayerMove where
   parseJSON =
-    withObject "person" $ \o -> do
+    withObject "playerMove" $ \o -> do
       playerId <- o .: "playerId"
       move <- o .: "move"
       return PlayerMove {..}
-
---instance FromJSON Move where
---  parseJSON = withObject "move" $ \o -> do
---      kind <- o .: "kind"
---      case kind of
---        "person" -> Person <$> o .: "name" <*> o .: "age"
---        "book"   -> Book <$> o .: "name" <*> o .: "author"
---        _        -> fail ("unknown kind: " ++ kind)
 
 instance FromJSON Move where
   parseJSON = withText "move" $ \txt ->
@@ -88,3 +88,16 @@ instance FromJSON Move where
       "Paper"    -> Paper
       "Scissors" -> Scissors
       _          -> Rock
+
+
+instance ToJSON Result where
+  toJSON result = object
+      [ "winner" .=
+        case result of
+          Winner payer -> Just payer
+          _ -> Nothing
+      , "status" .=
+        case result of
+          Winner payer -> "Won" :: String
+          Tie -> "Tie"
+      ]

@@ -21,16 +21,16 @@
         {{/gamesExists}}
         <!-- If there are games the render this -->
         {{#gamesExists}}
-            <div class="row white-text">
-              <div class="col-sm-8">
-                <h3>{{name}}</h3>
-                <div class="row"><div class="col-sm-4 underline">Player 1</div><div class="col-sm-4 underline">Player 2</div></div>
-                <div class="row"><div class="col-sm-4">{{player1}}</div><div class="col-sm-4">{{player2}}</div></div>
-                {{#completed}}
-                <div class="row"><div class="col-sm-8">Winner: {{winner}}</div></div>
-                {{/completed}}
-              </div>
-            </div>
+            {{#.}}
+                <div class="row white-text">
+                  <div class="col-sm-8">
+                    <h3>{{gameId}}</h3>
+                    <div class="row"><div class="col-sm-4 underline">Player 1</div><div class="col-sm-4 underline">Player 2</div></div>
+                    <div class="row"><div class="col-sm-4">{{playerId1}}</div><div class="col-sm-4">{{playerId2}}</div></div>
+                    <div class="row"><div class="col-sm-8">Status: {{state}}</div></div>
+                  </div>
+                </div>
+            {{/.}}
         {{/gamesExists}}
     </script>
     <title>Rock Scissors paper</title>
@@ -79,7 +79,12 @@
                 dataType: 'json'
             });
         }
-        
+
+        $("#startGameForm").find("#playerName").keypress(function (e) {
+            if (e.which === 13) {
+                makeStartGameRequest();
+            }
+        });
         $("#startGameButton").click(makeStartGameRequest)
     }
 
@@ -96,9 +101,9 @@
     <div id="errors"></div>
     <label for="startGame" class="underline">Start new game</label>
     <div id="startGame">
-        <form id="startGameForm">
+        <form id="startGameForm" onsubmit="return false;">
             <label for="playerName">Player Name:</label>
-            <input type="text" minlength="5" id="playerName">
+            <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
             <label for="move">Move:</label>
             <select id="move">
                 <option value="Rock" selected="selected">Rock</option>
