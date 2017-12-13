@@ -20,9 +20,9 @@ spec =
       it "responds with 200" $ get "/" `shouldRespondWith` 200
       it "has 'Content-Type: text/html'" $
         get "/" `shouldRespondWith` 200 {matchHeaders = ["Content-Type" <:> "text/html"]}
-    describe "GET /some-json" $
-      it "responds with some JSON" $
-        get "/some-json" `shouldRespondWith` expectedJsonResponse
+--    describe "GET /some-json" $
+--      it "responds with some JSON" $
+--        get "/some-json" `shouldRespondWith` expectedJsonResponse
 
 expectedJsonResponse =
   let ResponseMatcher status headers body = [json|{foo: 23, bar: 42}|]
