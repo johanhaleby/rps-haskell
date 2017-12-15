@@ -67,8 +67,8 @@ instance ToJSON Game where
       , "playerId2" .= case secondMove of
                         Just move -> Just $ playerId move
                         _ -> Nothing
-      -- TODO Use something like json+hal and add a link to join game instead
-      , "playable" .= case state of
+      -- TODO Use something like hal+json and add a link to join game instead
+      , "joinable" .= case state of
                         Ongoing -> True
                         Ended -> False
       , "result" .= result

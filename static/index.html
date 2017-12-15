@@ -13,6 +13,7 @@
               <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
               <strong>Error!</strong> {{message}}
       </div>
+
     </script>
     <script id="gameTemplate" type="x-tmpl-mustache">
         <!-- If there are no games then render this -->
@@ -24,44 +25,56 @@
             {{#.}}
                 <div class="row white-text">
                   <div class="col-sm-8">
-                    <h3>{{gameId}}</h3>
-                    <div class="row"><div class="col-sm-4 underline">Player 1</div><div class="col-sm-4 underline">Player 2</div></div>
-                    <div class="row"><div class="col-sm-4">{{playerId1}}</div><div class="col-sm-4">{{playerId2}}</div></div>
+                    <h3>{{name}}</h3>
+                    <div class="row">
+                        <div class="col-sm-4 underline">Player 1</div>
+                        {{^joinable}}
+                            <div class="col-sm-4 underline">Player 2</div>
+                        {{/joinable}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">{{playerId1}}</div>
+                        {{^joinable}}
+                            <div class="col-sm-4">{{playerId2}}</div>
+                        {{/joinable}}
+                    </div>
                     <div class="row"><div class="col-sm-8">Status: {{state}}</div></div>
                   </div>
                 </div>
             {{/.}}
         {{/gamesExists}}
+
     </script>
     <title>Rock Scissors paper</title>
 </head>
 <script type="text/javascript">
 
     function showError(message) {
-        var errorTemplate = $('#errorTemplate').html();
-        var errorMessage = {message: message};
-        var html = Mustache.render(errorTemplate, errorMessage);
+        const errorTemplate = $('#errorTemplate').html();
+        const errorMessage = {message: message};
+        const html = Mustache.render(errorTemplate, errorMessage);
         $('#errors').html(html);
     }
 
     function renderGames() {
-        $.get(window.location.href + "api/games", function (games) {
-            var gameTemplate = $('#gameTemplate').html();
+        $.get(window.location.href + "api/games", games => {
+            const gameTemplate = $('#gameTemplate').html();
             games.gamesExists = (games.length > 0);
-            var html = Mustache.render(gameTemplate, games);
+            games.map((game, index) => game.name = "Game " + (index + 1));
+            const html = Mustache.render(gameTemplate, games);
             $('#games').html(html);
         });
     }
 
     function startGameOnClick() {
         function makeStartGameRequest() {
-            var $startGameForm = $("#startGameForm");
-            var playerName = $startGameForm.find("#playerName").val();
-            var move = $startGameForm.find("#move").find(":selected").text();
+            const $startGameForm = $("#startGameForm");
+            const playerName = $startGameForm.find("#playerName").val();
+            const move = $startGameForm.find("#move").find(":selected").text();
             $.ajax({
                 //  Allow JQuery to treat empty 201 responses as non errors,
                 // see https://stackoverflow.com/questions/2233553/data-inserted-successful-but-jquery-still-returning-error
-                dataFilter: function (data, dataType) {
+                dataFilter: (data, dataType) => {
                     if (dataType === 'json' && data === '') {
                         return null;
                     } else {
@@ -72,7 +85,7 @@
                 url: window.location.href + "api/games",
                 data: JSON.stringify({playerId: playerName, move: move}),
                 success: renderGames,
-                error: function (xhr) {
+                error: xhr => {
                     console.log(xhr);
                     showError(xhr.responseText);
                 },
@@ -80,7 +93,7 @@
             });
         }
 
-        $("#startGameForm").find("#playerName").keypress(function (e) {
+        $("#startGameForm").find("#playerName").keypress(e =>  {
             if (e.which === 13) {
                 makeStartGameRequest();
             }
@@ -88,7 +101,7 @@
         $("#startGameButton").click(makeStartGameRequest)
     }
 
-    $(function () {
+    $(() => {
         startGameOnClick();
         renderGames();
     });
