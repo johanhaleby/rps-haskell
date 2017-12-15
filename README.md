@@ -11,7 +11,7 @@ Initialize:
     
 Running: 
     
-    $ stack run
+    $ stack exec rps-exe
 
 Tests:
 
