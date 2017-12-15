@@ -23,42 +23,44 @@
         <!-- If there are games the render this -->
         {{#gamesExists}}
             {{#.}}
-                <div class="row white-text">
-                    <div class="col-sm-4">
-                        <h3 class="underline">{{name}} - {{state}}</h3>
+                <div id="{{gameId}}" class="game">
+                    <div class="row white-text">
+                        <div class="col-sm-4">
+                            <h3 class="underline">{{name}} - {{state}}</h3>
+                        </div>
                     </div>
-                </div>
-                <div class="row white-text">
-                    <div class="col-sm-12">
-                        <div class="row">
-                            <div class="col-sm-2 bold">Player 1:</div>
-                            <div class="col-sm-2 bold">Player 2:</div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-2">{{playerId1}}</div>
-                            {{^joinable}}
-                                <div class="col-sm-2">{{playerId2}}</div>
-                            {{/joinable}}
-                            {{#joinable}}
-                                <div class="col-sm-2 black-text">
-                                    <input type="text" minlength="5" class="joinPlayerName, join-{{gameId}}"/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <div class="col-sm-2">Move:</div>
-                                    <div class="col-sm-5 black-text">
-                                      <select id="move">
-                                          <option value="Rock" selected="selected">Rock</option>
-                                          <option value="Paper">Paper</option>
-                                          <option value="Scissors">Scissors</option>
-                                      </select>
-                                    </div>
+                    <div class="row white-text">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-2 bold">Player 1:</div>
+                                <div class="col-sm-2 bold">Player 2:</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">{{playerId1}}</div>
+                                {{^joinable}}
+                                    <div class="col-sm-2">{{playerId2}}</div>
+                                {{/joinable}}
+                                {{#joinable}}
                                     <div class="col-sm-2 black-text">
-                                      <input type="button" value="Join game" class="joinGameButton">
+                                        <input type="text" minlength="5" class="joinPlayerName"/>
                                     </div>
-                                </div>
-                            {{/joinable}}
-                        </div>
-                      </div>
+                                    <div class="col-sm-3">
+                                        <div class="col-sm-2">Move:</div>
+                                        <div class="col-sm-5 black-text">
+                                          <select id="move-{{guid}}" class="joinMove">
+                                              <option value="Rock" selected="selected">Rock</option>
+                                              <option value="Paper">Paper</option>
+                                              <option value="Scissors">Scissors</option>
+                                          </select>
+                                        </div>
+                                        <div class="col-sm-2 black-text">
+                                          <input type="button" value="Join game" class="joinGameButton">
+                                        </div>
+                                    </div>
+                                {{/joinable}}
+                            </div>
+                          </div>
+                    </div>
                 </div>
             {{/.}}
         {{/gamesExists}}
@@ -85,43 +87,65 @@
         });
     }
 
+    function playGame(playerName, move, gameId) {
+        $.ajax({
+            //  Allow JQuery to treat empty 201 responses as non errors,
+            // see https://stackoverflow.com/questions/2233553/data-inserted-successful-but-jquery-still-returning-error
+            dataFilter: (data, dataType) => {
+                if (dataType === 'json' && data === '') {
+                    return null;
+                } else {
+                    return data;
+                }
+            },
+            type: "POST",
+            url: window.location.href + "api/games" + (gameId === undefined ? "" : ("/" + gameId)),
+            data: JSON.stringify({playerId: playerName, move: move}),
+            success: renderGames,
+            error: xhr => {
+                console.log(xhr);
+                showError(xhr.responseText);
+            },
+            dataType: 'json'
+        });
+    }
+
     function startGameOnClick() {
-        function makeStartGameRequest() {
+        function callStartGameApi() {
             const $startGameForm = $("#startGameForm");
-            const playerName = $startGameForm.find("#playerName").val();
+            const playerName = $startGameForm.find(".joinPlayerName").val();
             const move = $startGameForm.find("#move").find(":selected").text();
-            $.ajax({
-                //  Allow JQuery to treat empty 201 responses as non errors,
-                // see https://stackoverflow.com/questions/2233553/data-inserted-successful-but-jquery-still-returning-error
-                dataFilter: (data, dataType) => {
-                    if (dataType === 'json' && data === '') {
-                        return null;
-                    } else {
-                        return data;
-                    }
-                },
-                type: "POST",
-                url: window.location.href + "api/games",
-                data: JSON.stringify({playerId: playerName, move: move}),
-                success: renderGames,
-                error: xhr => {
-                    console.log(xhr);
-                    showError(xhr.responseText);
-                },
-                dataType: 'json'
-            });
+            playGame(playerName, move)
         }
 
         $("#startGameForm").find("#playerName").keypress(e =>  {
             if (e.which === 13) {
-                makeStartGameRequest();
+                callStartGameApi();
             }
         });
-        $("#startGameButton").click(makeStartGameRequest)
+
+        $("#startGameButton").click(callStartGameApi)
+    }
+
+    function joinGameOnClick() {
+        function callJoinGameApi() {
+            const $game = $(this).closest(".game");
+            const gameId = $game.attr("id");
+            const playerName = $game.find(".joinPlayerName").val();
+            if (playerName === "") {
+                showError("Cannot join game with empty player name");
+                return
+            }
+            const move = $game.find(".joinMove").find(":selected").text();
+            playGame(playerName, move, gameId)
+        }
+
+        $("#games").on("click", ".joinGameButton", callJoinGameApi);
     }
 
     $(() => {
         startGameOnClick();
+        joinGameOnClick();
         renderGames();
     });
 </script>
