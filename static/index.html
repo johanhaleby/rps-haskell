@@ -100,24 +100,28 @@
 <div class="container">
     <div id="errors"></div>
     <label for="startGame" class="underline">Start new game</label>
-    <div id="startGame">
-        <form id="startGameForm" onsubmit="return false;">
-            <label for="playerName">Player Name:</label>
-            <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
-            <label for="move">Move:</label>
-            <select id="move">
-                <option value="Rock" selected="selected">Rock</option>
-                <option value="Paper">Paper</option>
-                <option value="Scissors">Scissors</option>
-            </select>
-            <br>
-            <input type="button" value="Start game" id="startGameButton">
-        </form>
+    <div id="startGame" class="row">
+        <div class="col-sm-12">
+            <form id="startGameForm" onsubmit="return false;">
+                <label for="playerName">Player Name:</label>
+                <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
+                <label for="move">Move:</label>
+                <select id="move">
+                    <option value="Rock" selected="selected">Rock</option>
+                    <option value="Paper">Paper</option>
+                    <option value="Scissors">Scissors</option>
+                </select>
+                <br>
+                <input type="button" value="Start game" id="startGameButton">
+            </form>
+        </div>
     </div>
-
     <br>
-    <br>
-    <label for="games" class="underline">Games</label>
-    <div id="games">Loading games....</div>
+    <div class="row" style="overflow-y: auto; height: 580px;">
+        <div class="col-sm-12">
+            <label for="games" class="underline">Games</label>
+            <div id="games">Loading games....</div>
+        </div>
+    </div>
 </div>
 </html>
