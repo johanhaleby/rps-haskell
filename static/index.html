@@ -61,6 +61,18 @@
                             </div>
                           </div>
                     </div>
+                    {{#result}}
+                        <br>
+                        <div class="row white-text">
+                            <div class="col-sm-4">
+                                Result:
+                                    {{#result.winner}}
+                                        {{result.winner}}
+                                    {{/result.winner}}
+                                {{result.status}}
+                            </div>
+                        </div>
+                    {{/result}}
                 </div>
             {{/.}}
         {{/gamesExists}}
@@ -113,7 +125,7 @@
     function startGameOnClick() {
         function callStartGameApi() {
             const $startGameForm = $("#startGameForm");
-            const playerName = $startGameForm.find(".joinPlayerName").val();
+            const playerName = $startGameForm.find("#playerName").val();
             const move = $startGameForm.find("#move").find(":selected").text();
             playGame(playerName, move)
         }

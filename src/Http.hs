@@ -15,7 +15,7 @@ import           Data.Semigroup                       ((<>))
 import           Data.Text.Lazy                       (fromStrict)
 import           Domain
 import           InMemoryRepository
-import           Network.HTTP.Types                   (created201)
+import           Network.HTTP.Types                   (created201, notFound404, accepted202)
 import           Network.Wai                          (Application)
 import           Network.Wai.Middleware.RequestLogger
 import           Network.Wai.Middleware.Static
@@ -29,9 +29,18 @@ indexPage = do
   setHeader "Content-Type" "text/html"
   file "./static/index.html"
 
+playGame :: (GameRepository repo) => repo -> Maybe Game -> PlayerMove -> ActionM ()
+playGame _ Nothing _ = status notFound404
+playGame repo (Just game) move = do
+  liftIO $ do
+    let updatedGame = play game{secondMove = Just move}
+    save repo updatedGame
+  status accepted202
+
 routes :: (GameRepository repo) => repo -> ScottyM ()
 routes gameRepository = do
   get "/" indexPage
+
   -- API
   get "/api/games" $ do
     allGames <- liftIO $ findAll gameRepository
@@ -41,7 +50,12 @@ routes gameRepository = do
     game <- liftIO $ startGame gameRepository playerMove
     setHeader "Location" (fromStrict $ "/api/games/" <> gameId game)
     status created201
-
+  post "/api/games/:gameId" $ do
+    gameId <- param "gameId"
+    otherPlayerMove <- jsonData :: ActionM PlayerMove
+    maybeGame <- liftIO $ findById gameRepository gameId
+    playGame gameRepository maybeGame otherPlayerMove
+      
 app :: IO Application
 app = do
   repo <- newEmptyRepository
