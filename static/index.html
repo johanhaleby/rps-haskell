@@ -24,22 +24,41 @@
         {{#gamesExists}}
             {{#.}}
                 <div class="row white-text">
-                  <div class="col-sm-8">
-                    <h3>{{name}}</h3>
-                    <div class="row">
-                        <div class="col-sm-4 underline">Player 1</div>
-                        {{^joinable}}
-                            <div class="col-sm-4 underline">Player 2</div>
-                        {{/joinable}}
+                    <div class="col-sm-4">
+                        <h3 class="underline">{{name}} - {{state}}</h3>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-4">{{playerId1}}</div>
-                        {{^joinable}}
-                            <div class="col-sm-4">{{playerId2}}</div>
-                        {{/joinable}}
-                    </div>
-                    <div class="row"><div class="col-sm-8">Status: {{state}}</div></div>
-                  </div>
+                </div>
+                <div class="row white-text">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 bold">Player 1:</div>
+                            <div class="col-sm-2 bold">Player 2:</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">{{playerId1}}</div>
+                            {{^joinable}}
+                                <div class="col-sm-2">{{playerId2}}</div>
+                            {{/joinable}}
+                            {{#joinable}}
+                                <div class="col-sm-2 black-text">
+                                    <input type="text" minlength="5" class="joinPlayerName, join-{{gameId}}"/>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="col-sm-2">Move:</div>
+                                    <div class="col-sm-5 black-text">
+                                      <select id="move">
+                                          <option value="Rock" selected="selected">Rock</option>
+                                          <option value="Paper">Paper</option>
+                                          <option value="Scissors">Scissors</option>
+                                      </select>
+                                    </div>
+                                    <div class="col-sm-2 black-text">
+                                      <input type="button" value="Join game" class="joinGameButton">
+                                    </div>
+                                </div>
+                            {{/joinable}}
+                        </div>
+                      </div>
                 </div>
             {{/.}}
         {{/gamesExists}}
