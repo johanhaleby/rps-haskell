@@ -1,0 +1,12 @@
+{
+  "name": "haskell-rps",
+  "description": "Rock Papers Scissors written in Haskell",
+  "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a4/1328101982_Cut.png",
+  "repository": "https://github.com/johanhaleby/rps-haskell",
+  "env": {
+    "BUILDPACK_URL": {
+      "description": "Heroku buildpack for deploying Haskell apps",
+      "value": "https://github.com/mietek/haskell-on-heroku"
+    }
+  }
+}
