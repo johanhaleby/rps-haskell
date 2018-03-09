@@ -58,4 +58,4 @@ test-suite rps-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/rps
+  location: https://github.com/johanhaleby/haskell-rps
