@@ -33,3 +33,19 @@ body {
 .bold {
     font-weight: bold;
 }
+
+.move {
+    cursor: pointer;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.move:hover {
+    border: 4px solid #d0d0d0;
+}
+
+.move-made {
+    border: 4px solid #fff53e;
+}

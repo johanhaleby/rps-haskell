@@ -4,17 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     <link rel="stylesheet" href="static/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
     <script id="errorTemplate" type="x-tmpl-mustache">
       <div class="alert alert-danger">
               <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
               <strong>Error!</strong> {{message}}
       </div>
-
     </script>
+
+    <script id="infoTemplate" type="x-tmpl-mustache">
+      <div class="alert alert-success">
+              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+              {{message}}
+      </div>
+    </script>
+
     <script id="gameTemplate" type="x-tmpl-mustache">
         <!-- If there are no games then render this -->
         {{^gamesExists}}
@@ -77,6 +86,9 @@
             {{/.}}
         {{/gamesExists}}
 
+
+
+
     </script>
     <title>Rock Paper Scissors</title>
 </head>
@@ -86,7 +98,14 @@
         const errorTemplate = $('#errorTemplate').html();
         const errorMessage = {message: message};
         const html = Mustache.render(errorTemplate, errorMessage);
-        $('#errors').html(html);
+        $('#message').html(html);
+    }
+
+    function showInfo(message) {
+        const infoTemplate = $('#infoTemplate').html();
+        const infoMessage = {message: message};
+        const html = Mustache.render(infoTemplate, infoMessage);
+        $('#message').html(html);
     }
 
     function renderGames() {
@@ -124,19 +143,52 @@
 
     function startGameOnClick() {
         function callStartGameApi() {
-            const $startGameForm = $("#startGameForm");
+            const $this = $(this);
+            const $startGameForm = $this.parents("#startGameForm");
             const playerName = $startGameForm.find("#playerName").val();
-            const move = $startGameForm.find("#move").find(":selected").text();
-            playGame(playerName, move)
+            if (!playerName) {
+                showError("Cannot start game with empty player name");
+                return;
+            }
+            $(".newGameDiv").on('click', startNewGame);
+            const $playerNameDiv = $startGameForm.find(".playerNameDiv");
+            const $newGameTitle = $startGameForm.find(".newGameTitle");
+            const $moves = $startGameForm.find(".move");
+            $moves.off('click');
+            const move = $this.data("move");
+            playGame(playerName, move);
+            $this.siblings().animate({
+                opacity: '0.5',
+                height: '50px',
+                width: '50px'
+            }, 200, function () {
+                $playerNameDiv.fadeOut(100);
+                $this.addClass("move-made");
+                $moves.removeClass("move");
+                $newGameTitle.text("Played:");
+                $(".newGameDiv").removeClass("hidden");
+            });
         }
 
-        $("#startGameForm").find("#playerName").keypress(e =>  {
-            if (e.which === 13) {
-                callStartGameApi();
-            }
-        });
+        function startNewGame() {
+            const $startGameForm = $("#startGameForm");
+            $startGameForm.find(".newGameTitle").text("Start new game");
+            $startGameForm.find("img").animate({
+                opacity: '1.0',
+                height: '100px',
+                width: '100px'
+            }, 200, function () {
+                $startGameForm.find(".playerNameDiv").fadeIn(100);
+                $(this).removeClass("move-made");
+                $(this).addClass("move");
+                $(this).on('click', callStartGameApi);
+                const $newGameDiv = $(".newGameDiv");
+                $newGameDiv.addClass("hidden");
+                $newGameDiv.off('click', startNewGame);
+            });
+        }
 
-        $("#startGameButton").click(callStartGameApi)
+        $(".move").on('click', callStartGameApi);
     }
 
     function joinGameOnClick() {
@@ -144,9 +196,9 @@
             const $game = $(this).closest(".game");
             const gameId = $game.attr("id");
             const playerName = $game.find(".joinPlayerName").val();
-            if (playerName === "") {
+            if (!playerName) {
                 showError("Cannot join game with empty player name");
-                return
+                return;
             }
             const move = $game.find(".joinMove").find(":selected").text();
             playGame(playerName, move, gameId)
@@ -167,29 +219,38 @@
 </div>
 
 <div class="container">
-    <div id="errors"></div>
-    <label for="startGame" class="underline">Start new game</label>
-    <div id="startGame" class="row">
-        <div class="col-sm-12">
-            <form id="startGameForm" onsubmit="return false;">
+    <div id="message"></div>
+    <form id="startGameForm" onsubmit="return false;">
+        <label for="startGame" class="underline newGameTitle">Start new game</label>
+        <div id="startGame" class="row">
+            <div class="col-sm-12 playerNameDiv">
                 <label for="playerName">Player Name:</label>
                 <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
-                <label for="move">Move:</label>
-                <select id="move">
-                    <option value="Rock" selected="selected">Rock</option>
-                    <option value="Paper">Paper</option>
-                    <option value="Scissors">Scissors</option>
-                </select>
-                <br>
-                <input type="button" value="Start game" id="startGameButton">
-            </form>
+            </div>
+            <div class="col-sm-12">
+                <img id="new-rock"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
+                     title="Rock" alt="Rock" data-move="Rock" class="move img-thumbnail rounded float-left" height="100" width="100"/>
+                <img id="new-paper"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rock-paper-scissors_%28paper%29.png/200px-Rock-paper-scissors_%28paper%29.png"
+                     title="Paper" alt="Paper" data-move="Paper" class="move img-thumbnail rounded float-left" height="100" width="100"/>
+                <img id="new-scissors"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Rock-paper-scissors_%28scissors%29.png/200px-Rock-paper-scissors_%28scissors%29.png"
+                     title="Scissors" alt="Scissors" data-move="Scissors" class="move img-thumbnail rounded float-left" height="100"
+                     width="100"/>
+            </div>
+        </div>
+    </form>
+    <br>
+    <div class="row hidden newGameDiv">
+        <div class="col-sm-12">
+            <button type="button" class="btn">New Game</button>
         </div>
     </div>
     <br>
-    <label for="games" class="underline">Games</label>
+    <label for="games" class="underline">Ongoing Games</label>
     <div class="row" style="overflow-y: auto; height: 580px;">
         <div class="col-sm-12">
-
             <div id="games">Loading games....</div>
         </div>
     </div>
