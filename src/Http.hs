@@ -9,13 +9,15 @@ import           Data.Aeson                           (FromJSON, ToJSON,
                                                        object, parseJSON,
                                                        toJSON, withObject,
                                                        withText, (.:), (.=))
+import           System.Environment
 -- <> is needed to concatenate Text's
 import           Data.Semigroup                       ((<>))
 -- Need for converting strict Text (Data.Text) to lazy Text (Data.Text.Lazy) which Scotty is using
 import           Data.Text.Lazy                       (fromStrict)
 import           Domain
 import           InMemoryRepository
-import           Network.HTTP.Types                   (created201, notFound404, accepted202)
+import           Network.HTTP.Types                   (accepted202, created201,
+                                                       notFound404)
 import           Network.Wai                          (Application)
 import           Network.Wai.Middleware.RequestLogger
 import           Network.Wai.Middleware.Static
@@ -55,7 +57,7 @@ routes gameRepository = do
     otherPlayerMove <- jsonData :: ActionM PlayerMove
     maybeGame <- liftIO $ findById gameRepository gameId
     playGame gameRepository maybeGame otherPlayerMove
-      
+
 app :: IO Application
 app = do
   repo <- newEmptyRepository
@@ -64,7 +66,9 @@ app = do
 runApp :: IO ()
 runApp = do
   repo <- newEmptyRepository :: IO InMemoryGameRepository
-  scotty 8080 $ do
+  env <- getEnvironment
+  let port = maybe 8080 read $ lookup "PORT" env
+  scotty port $ do
     -- Apply request logging
     middleware logStdoutDev
     -- Apply static content
@@ -80,11 +84,11 @@ instance ToJSON Game where
       , "playerId1" .= playerId firstMove
       , "playerId2" .= case secondMove of
                         Just move -> Just $ playerId move
-                        _ -> Nothing
+                        _         -> Nothing
       -- TODO Use something like hal+json and add a link to join game instead
       , "joinable" .= case state of
                         Ongoing -> True
-                        Ended -> False
+                        Ended   -> False
       , "result" .= result
       ]
 
@@ -109,9 +113,9 @@ instance ToJSON Result where
       [ "winner" .=
         case result of
           Winner payer -> Just payer
-          _ -> Nothing
+          _            -> Nothing
       , "status" .=
         case result of
           Winner payer -> "Won" :: String
-          Tie -> "Tie"
+          Tie          -> "Tie"
       ]
