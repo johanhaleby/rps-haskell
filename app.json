@@ -5,8 +5,8 @@
   "repository": "https://github.com/johanhaleby/rps-haskell",
   "env": {
     "BUILDPACK_URL": {
-      "description": "Heroku buildpack for deploying Haskell apps",
-      "value": "https://github.com/mietek/haskell-on-heroku"
+      "description": "Heroku Buildpack for Stack",
+      "value": "https://github.com/mfine/heroku-buildpack-stack"
     }
   }
 }
