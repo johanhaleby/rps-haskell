@@ -136,13 +136,12 @@
         function callStartGameApi() {
             const $this = $(this);
             const $startGameForm = $this.parents("#startGameForm");
-            const playerName = $startGameForm.find("#playerName").val();
+            const playerName = $("#playerName").val();
             if (!playerName) {
                 showError("Cannot start game with empty player name");
                 return;
             }
             $(".newGameDiv").on('click', startNewGame);
-            const $playerNameDiv = $startGameForm.find(".playerNameDiv");
             const $newGameTitle = $startGameForm.find(".newGameTitle");
             const $moves = $startGameForm.find(".move");
             const move = $this.data("move");
@@ -155,7 +154,6 @@
             }, 200, function () {
                 $this.addClass("move-made");
                 $moves.removeClass("move");
-                $playerNameDiv.fadeOut(100);
                 $newGameTitle.text("Played:");
                 $(".newGameDiv").removeClass("hidden");
             });
@@ -211,13 +209,11 @@
 
 <div class="container">
     <div id="message"></div>
+    <label for="playerName">Player Name:</label>
+    <input type="text" minlength="2" id="playerName" tabindex="1" class="form-control" placeholder="Enter your name" autofocus required>
     <form id="startGameForm" onsubmit="return false;">
-        <label for="startGame" class="underline newGameTitle">Start new game</label>
+        <label for="startGame" class="newGameTitle">Start new game:</label>
         <div id="startGame" class="row">
-            <div class="col-sm-12 playerNameDiv">
-                <label for="playerName">Player Name:</label>
-                <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
-            </div>
             <div class="col-sm-12">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
                      title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
