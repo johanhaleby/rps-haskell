@@ -1,6 +1,6 @@
 body {
     background-color: #d0d0d0;
-    height: 500px;
+    overflow-y: hidden;
 }
 
 .container label {
@@ -85,3 +85,7 @@ h1 {
 /*padding: 2px 16px;*/
 /*}*/
 /* End Card */
+
+#startGame {
+    margin-left: 0px;
+}
