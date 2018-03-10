@@ -1,17 +1,6 @@
 body {
-    background: -webkit-gradient(
-            linear,
-            left bottom,
-            left top,
-            color-stop(0.43, rgb(87, 84, 176)),
-            color-stop(0.72, rgb(208, 206, 235))
-    );
-    background: -moz-linear-gradient(
-            center bottom,
-            rgb(87, 84, 176) 43%,
-            rgb(208, 206, 235) 72%
-    );
-    height: 920px;
+    background-color: #d0d0d0;
+    height: 500px;
 }
 
 .container label {
@@ -59,13 +48,40 @@ body {
     width: 100px;
 }
 
-.top-buffer { margin-top:5px; }
+.top-buffer {
+    margin-top: 5px;
+}
 
 input:invalid {
-  background-color: #ffdddd;
+    background-color: #ffdddd;
 }
 
-input:required {
-  border-color: #800000;
-  border-width: 3px;
+h1 {
+    color: white;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 1;
 }
+
+/* Card */
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    width: 100%;
+    border-radius: 5px;
+    background-color: powderblue;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+/*.card > .container {*/
+/*padding: 2px 16px;*/
+/*}*/
+/* End Card */

@@ -30,7 +30,7 @@
         <!-- If there are games the render this -->
         {{#gamesExists}}
             {{#.}}
-                <div id="{{gameId}}" class="game">
+                <div id="{{gameId}}" class="game card">
                     <div class="row white-text">
                         <div class="col-sm-4">
                             <h3 class="underline">{{name}} - {{state}}</h3>
@@ -39,16 +39,21 @@
                     <div class="row white-text">
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="col-sm-2 bold">Player 1:&nbsp;{{playerId1}}</div>
-                                <div class="col-sm-4 bold">
-                                    Player 2:&nbsp;
-                                    {{^joinable}}
-                                        {{playerId2}}
-                                    {{/joinable}}
-                                    {{#joinable}}
-                                        <input type="text" minlength="5" class="joinPlayerName normal black-text"/>
-                                    {{/joinable}}
-                                </div>
+                                {{^joinable}}
+                                    <div class="col-sm-2 bold">{{playerId1}} vs {{playerId2}}</div>
+                                {{/joinable}}
+                                {{#joinable}}
+                                    <div class="col-sm-2 bold">Opponent:&nbsp;{{playerId1}}</div>
+                                    <div class="col-sm-4 bold">
+                                        Player 2:&nbsp;
+                                        {{^joinable}}
+                                            {{playerId2}}
+                                        {{/joinable}}
+                                        {{#joinable}}
+                                            <input type="text" minlength="5" class="joinPlayerName normal black-text"/>
+                                        {{/joinable}}
+                                    </div>
+                                {{/joinable}}
                             </div>
                             {{#joinable}}
                                 <div class="row top-buffer">
@@ -209,11 +214,11 @@
 
 <div class="container">
     <div id="message"></div>
-    <label for="playerName">Player Name:</label>
-    <input type="text" minlength="2" id="playerName" tabindex="1" class="form-control" placeholder="Enter your name" autofocus required>
+    <h1>Your Name</h1>
+    <input type="text" minlength="2" id="playerName" tabindex="1" class="form-control" placeholder="Enter your name to play" autofocus required>
+    <h1>Start New Game</h1>
     <form id="startGameForm" onsubmit="return false;">
-        <label for="startGame" class="newGameTitle">Start new game:</label>
-        <div id="startGame" class="row">
+        <div id="startGame" class="row card">
             <div class="col-sm-12">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
                      title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
@@ -231,7 +236,7 @@
         </div>
     </div>
     <br>
-    <label for="games" class="underline">Ongoing Games</label>
+    <h1>Ongoing Games</h1>
     <div class="row" style="overflow-y: auto; height: 580px;">
         <div class="col-sm-12">
             <div id="games">Loading games....</div>
