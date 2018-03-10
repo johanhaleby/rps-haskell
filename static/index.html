@@ -4,11 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     <link rel="stylesheet" href="static/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
     <script id="errorTemplate" type="x-tmpl-mustache">
       <div class="alert alert-danger">
@@ -41,33 +39,30 @@
                     <div class="row white-text">
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="col-sm-2 bold">Player 1:</div>
-                                <div class="col-sm-2 bold">Player 2:</div>
+                                <div class="col-sm-2 bold">Player 1:&nbsp;{{playerId1}}</div>
+                                <div class="col-sm-4 bold">
+                                    Player 2:&nbsp;
+                                    {{^joinable}}
+                                        {{playerId2}}
+                                    {{/joinable}}
+                                    {{#joinable}}
+                                        <input type="text" minlength="5" class="joinPlayerName normal black-text"/>
+                                    {{/joinable}}
+                                </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-2">{{playerId1}}</div>
-                                {{^joinable}}
-                                    <div class="col-sm-2">{{playerId2}}</div>
-                                {{/joinable}}
-                                {{#joinable}}
-                                    <div class="col-sm-2 black-text">
-                                        <input type="text" minlength="5" class="joinPlayerName"/>
+                            {{#joinable}}
+                                <div class="row top-buffer">
+                                    <div class="col-sm-2">&nbsp;</div>
+                                    <div class="col-sm-4">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
+                                                 title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rock-paper-scissors_%28paper%29.png/200px-Rock-paper-scissors_%28paper%29.png"
+                                                 title="Paper" alt="Paper" data-move="Paper" class="rps-img move img-thumbnail rounded float-left" />
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Rock-paper-scissors_%28scissors%29.png/200px-Rock-paper-scissors_%28scissors%29.png"
+                                                 title="Scissors" alt="Scissors" data-move="Scissors" class="rps-img move img-thumbnail rounded float-left" />
                                     </div>
-                                    <div class="col-sm-3">
-                                        <div class="col-sm-2">Move:</div>
-                                        <div class="col-sm-5 black-text">
-                                          <select id="move-{{guid}}" class="joinMove">
-                                              <option value="Rock" selected="selected">Rock</option>
-                                              <option value="Paper">Paper</option>
-                                              <option value="Scissors">Scissors</option>
-                                          </select>
-                                        </div>
-                                        <div class="col-sm-2 black-text">
-                                          <input type="button" value="Join game" class="joinGameButton">
-                                        </div>
-                                    </div>
-                                {{/joinable}}
-                            </div>
+                                </div>
+                            {{/joinable}}
                           </div>
                     </div>
                     {{#result}}
@@ -85,10 +80,6 @@
                 </div>
             {{/.}}
         {{/gamesExists}}
-
-
-
-
     </script>
     <title>Rock Paper Scissors</title>
 </head>
@@ -154,17 +145,17 @@
             const $playerNameDiv = $startGameForm.find(".playerNameDiv");
             const $newGameTitle = $startGameForm.find(".newGameTitle");
             const $moves = $startGameForm.find(".move");
-            $moves.off('click');
             const move = $this.data("move");
+            $moves.off('click');
             playGame(playerName, move);
             $this.siblings().animate({
                 opacity: '0.5',
                 height: '50px',
                 width: '50px'
             }, 200, function () {
-                $playerNameDiv.fadeOut(100);
                 $this.addClass("move-made");
                 $moves.removeClass("move");
+                $playerNameDiv.fadeOut(100);
                 $newGameTitle.text("Played:");
                 $(".newGameDiv").removeClass("hidden");
             });
@@ -228,16 +219,12 @@
                 <input type="text" minlength="5" id="playerName" tabindex="1" autofocus>
             </div>
             <div class="col-sm-12">
-                <img id="new-rock"
-                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
-                     title="Rock" alt="Rock" data-move="Rock" class="move img-thumbnail rounded float-left" height="100" width="100"/>
-                <img id="new-paper"
-                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rock-paper-scissors_%28paper%29.png/200px-Rock-paper-scissors_%28paper%29.png"
-                     title="Paper" alt="Paper" data-move="Paper" class="move img-thumbnail rounded float-left" height="100" width="100"/>
-                <img id="new-scissors"
-                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Rock-paper-scissors_%28scissors%29.png/200px-Rock-paper-scissors_%28scissors%29.png"
-                     title="Scissors" alt="Scissors" data-move="Scissors" class="move img-thumbnail rounded float-left" height="100"
-                     width="100"/>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
+                     title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rock-paper-scissors_%28paper%29.png/200px-Rock-paper-scissors_%28paper%29.png"
+                     title="Paper" alt="Paper" data-move="Paper" class="rps-img move img-thumbnail rounded float-left" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Rock-paper-scissors_%28scissors%29.png/200px-Rock-paper-scissors_%28scissors%29.png"
+                     title="Scissors" alt="Scissors" data-move="Scissors" class="rps-img move img-thumbnail rounded float-left" />
             </div>
         </div>
     </form>
