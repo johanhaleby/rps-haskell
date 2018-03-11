@@ -91,9 +91,10 @@
         $('#message').html(html);
     }
 
-    function renderGames() {
+    function loadExistingGames() {
         $.get(window.location.href + "api/games", games => {
             const gameTemplate = $('#gameTemplate').html();
+            console.log("games! " + games);
             games.gamesExists = (games.length > 0);
             games.map((game, index) => game.name = "" + (index + 1));
             const html = Mustache.render(gameTemplate, games);
@@ -115,7 +116,7 @@
             type: "POST",
             url: window.location.href + "api/games" + (gameId === undefined ? "" : ("/" + gameId)),
             data: JSON.stringify({playerId: playerName, move: move}),
-            success: renderGames,
+            success: loadExistingGames,
             error: xhr => {
                 console.log(xhr);
                 showError(xhr.responseText);
@@ -141,6 +142,7 @@
         $("#cancelNewGame").click(function () {
             $(".newGameButtonDiv").show();
             $("#startGameDiv").hide();
+            $("#message").hide();
         });
 
     }
@@ -219,9 +221,9 @@
         showNewGameOnClick();
         startGameOnClick();
         joinGameOnClick();
-        renderGames();
-        sizeGamesDiv();
         $("#startGameDiv").hide();
+        sizeGamesDiv();
+        loadExistingGames();
     });
 </script>
 <div class="jumbotron text-center">
@@ -239,7 +241,7 @@
             <div id="startGame" class="row">
                 <div class="col-sm-12 card">
                     <div id="cancelNewGame">
-                        <a href="#" class="close" aria-label="close">&times;</a>
+                        <a class="close" aria-label="close">&times;</a>
                     </div>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
                          title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
