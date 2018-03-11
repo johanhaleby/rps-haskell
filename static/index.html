@@ -129,7 +129,7 @@
             const $startGameDiv = $("#startGameDiv");
             $("#startGameTitle").text("Make your move:");
             $startGameDiv.show();
-            $(".newGameDiv").hide();
+            $(".newGameButtonDiv").hide();
             // Reset moves to initial state
             const $moves = $startGameDiv.find(".img-thumbnail");
             $moves.removeAttr('style'); // Reset JQuery animation left overs
@@ -138,6 +138,10 @@
         }
 
         $("#newGameButton").click(showMoves);
+        $("#cancelNewGame").click(function () {
+            $(".newGameButtonDiv").show();
+            $("#startGameDiv").hide();
+        });
 
     }
 
@@ -156,7 +160,7 @@
             const move = $this.data("move");
             $moves.off('click');
             playGame(playerName, move);
-            $this.siblings().animate({
+            $this.siblings(".img-thumbnail").animate({
                 opacity: '0.5',
                 height: '50px',
                 width: '50px'
@@ -164,26 +168,8 @@
                 $this.addClass("move-made");
                 $moves.removeClass("move");
                 $newGameTitle.text("Played:");
-                $(".newGameDiv").show();
+                $(".newGameButtonDiv").show();
                 $("#startGameTitle").text("Game started!");
-            });
-        }
-
-        function startNewGame() {
-            const $startGameForm = $("#startGameForm");
-            $startGameForm.find(".newGameTitle").text("Start new game");
-            $startGameForm.find("img").animate({
-                opacity: '1.0',
-                height: '100px',
-                width: '100px'
-            }, 200, function () {
-                $startGameForm.find(".playerNameDiv").fadeIn(100);
-                $(this).removeClass("move-made");
-                $(this).addClass("move");
-                $(this).on('click', callStartGameApi);
-                const $newGameDiv = $(".newGameDiv");
-                $newGameDiv.hide();
-                $newGameDiv.off('click', startNewGame);
             });
         }
 
@@ -192,7 +178,6 @@
 
     function joinGameOnClick() {
         function callJoinGameApi() {
-            console.log("IKK")
             const $this = $(this);
             const $game = $this.closest(".game");
             const gameId = $game.attr("id");
@@ -253,6 +238,9 @@
         <form id="startGameForm" onsubmit="return false;">
             <div id="startGame" class="row">
                 <div class="col-sm-12 card">
+                    <div id="cancelNewGame">
+                        <a href="#" class="close" aria-label="close">&times;</a>
+                    </div>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Rock-paper-scissors_%28rock%29.png/200px-Rock-paper-scissors_%28rock%29.png"
                          title="Rock" alt="Rock" data-move="Rock" class="rps-img move img-thumbnail rounded float-left" />
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rock-paper-scissors_%28paper%29.png/200px-Rock-paper-scissors_%28paper%29.png"
@@ -263,7 +251,7 @@
             </div>
         </form>
     </div>
-    <div class="row newGameDiv">
+    <div class="row newGameButtonDiv">
         <div class="col-sm-12">
             <button id="newGameButton" type="button" class="btn pulse">New Game</button>
         </div>
