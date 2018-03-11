@@ -126,9 +126,15 @@
 
     function showNewGameOnClick() {
         function showMoves() {
+            const $startGameDiv = $("#startGameDiv");
             $("#startGameTitle").text("Make your move:");
-            $("#startGameDiv").show();
+            $startGameDiv.show();
             $(".newGameDiv").hide();
+            // Reset moves to initial state
+            const $moves = $startGameDiv.find(".img-thumbnail");
+            $moves.removeAttr('style'); // Reset JQuery animation left overs
+            $moves.addClass("move");
+            $moves.removeClass("move-made");
         }
 
         $("#newGameButton").click(showMoves);
