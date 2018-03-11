@@ -136,6 +136,7 @@
             $moves.removeAttr('style'); // Reset JQuery animation left overs
             $moves.addClass("move");
             $moves.removeClass("move-made");
+            calculateAndSetHeight($startGameDiv.height() / 20);
         }
 
         $("#newGameButton").click(showMoves);
@@ -143,6 +144,7 @@
             $(".newGameButtonDiv").show();
             $("#startGameDiv").hide();
             $("#message").hide();
+            calculateAndSetHeight(0);
         });
 
     }
@@ -206,15 +208,17 @@
         $("#games").on("click", ".move", callJoinGameApi);
     }
 
-    function sizeGamesDiv() {
-        function calculateAndSetHeight() {
-            const $gamesDiv = $("#gamesDiv");
-            const newHeight = screen.height - $gamesDiv.offset().top - 10;
-            $gamesDiv.height(newHeight);
-        }
+    function calculateAndSetHeight(padding) {
+        const $gamesDiv = $("#gamesDiv");
+        const newHeight = screen.height - $gamesDiv.offset().top - 150 - padding;
+        $gamesDiv.height(newHeight);
+    }
 
-        calculateAndSetHeight();
-        $(window).on('resize', "#gamesDiv", calculateAndSetHeight);
+    function monitorAndSetGamesDivSize() {
+        calculateAndSetHeight(0);
+        $(window).on('resize', "#gamesDiv", function () {
+            calculateAndSetHeight(0);
+        });
     }
 
     $(() => {
@@ -222,7 +226,7 @@
         startGameOnClick();
         joinGameOnClick();
         $("#startGameDiv").hide();
-        sizeGamesDiv();
+        monitorAndSetGamesDivSize();
         loadExistingGames();
     });
 </script>
